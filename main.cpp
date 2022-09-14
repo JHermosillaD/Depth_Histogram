@@ -40,6 +40,14 @@ Mat drawHistogram(Mat img) {
 }
 
 int main(int argc, char **argv) {
+  Mat img;
+  img = imread("/home/jhermosilla/Proyects backup/C-Party/OpenCV/Images/image.jpg", 0);
+  if (!img.data) {
+    printf("No image data \n");
+    return -1;
+  }
   
+  imshow("Output", img);
+  waitKey(0);  
   return 0;
 }
