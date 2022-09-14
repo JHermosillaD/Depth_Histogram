@@ -45,30 +45,26 @@ Mat drawHistogram(Mat img) {
 
   var = var/(histsize-1);
   sd = sqrt(var);
-  float treshold = mean + sd;
+  float treshold = 210;
   
-  cout << mean << ", " << var << ", " << sd << ", " << treshold << endl;
   for(int i = 0; i < histsize; i++)
-    if(histogram[i] > (int(treshold)))
-      line(histImage, Point(bin_w*(i), hist_h), Point(bin_w*(i), hist_h-histogram[i]), Scalar(0,0,255), 1, 8, 0);
+    line(histImage, Point(bin_w*(i), hist_h), Point(bin_w*(i), hist_h-histogram[i]), Scalar(0,0,255), 1, 8, 0);
   line(histImage, Point(bin_w, hist_h-cvRound(treshold)), Point(hist_w,hist_h-cvRound(treshold)), Scalar(255,0,0), 2, 8, 0);
 
   Mat filtImage(img.rows, img.cols, CV_8UC1, Scalar(0,0,0));
-  for (int i=0;i<filtImage.rows;i++) {
-    uchar* ptr = filtImage.ptr<uchar>(i);
-    uchar* ptr0 = img.ptr<uchar>(i);
-    for (int j=0;j<filtImage.cols;j++) 
-      if (ptr0[j] > (int)treshold)
-	ptr[j] = 255;
-  }
+  for( int i = 0; i < img.rows; ++i) 
+    for( int j = 0; j < img.cols; ++j) 
+      if( (int)img.at<uchar>(i,j) > (int)treshold) 
+	filtImage.at<uchar>(i,j) = 255;
 
   imshow("Histogram", histImage);
-  return filtImage;
+  hconcat(img,filtImage,img);
+  return img;
 }
 
 int main(int argc, char **argv) {
   Mat img, histogram;
-  img = imread("/home/jhermosilla/Proyects backup/C-Party/OpenCV/Images/rama-de-manzano.jpg");
+  img = imread("/home/jhermosilla/Proyects backup/C-Party/OpenCV/Images/bbox.jpg");
   if (!img.data) {
     printf("No image data \n");
     return -1;
@@ -76,8 +72,8 @@ int main(int argc, char **argv) {
   cvtColor(img,img, COLOR_BGR2GRAY);
   Mat dst;
   equalizeHist(img, dst);
-  histogram = drawHistogram(dst);
-  imshow("Output", histogram);
+  histogram = drawHistogram(img);
+  imshow("Equalized image vs Mean filter", histogram);
   waitKey(0);  
   return 0;
 }
