@@ -81,7 +81,7 @@ Mat drawHistogram(Mat img, vector<int> histogram) {
 		  
 int main(int argc, char** argv) {
 
-  Mat img  = imread("/home/jhermosilla/Proyects backup/C-Party/OpenCV/Images/person.pgm", IMREAD_ANYDEPTH);
+  Mat img  = imread("/home/jhermosilla/GitHub/Depth_Histogram/img/person.pgm", IMREAD_ANYDEPTH);
   img.convertTo(img, CV_16U);
 
   vector<int> vectHistogram = makeHistogram(img);
