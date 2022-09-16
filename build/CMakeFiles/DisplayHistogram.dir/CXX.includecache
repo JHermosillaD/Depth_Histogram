@@ -7,14 +7,12 @@
 #IncludeRegexTransform: 
 
 /home/jhermosilla/GitHub/Depth_Histogram/main.cpp
-opencv2/objdetect.hpp
--
 opencv2/highgui.hpp
--
+/home/jhermosilla/GitHub/Depth_Histogram/opencv2/highgui.hpp
+opencv2/imgcodecs.hpp
+/home/jhermosilla/GitHub/Depth_Histogram/opencv2/imgcodecs.hpp
 opencv2/imgproc.hpp
--
-opencv2/videoio.hpp
--
+/home/jhermosilla/GitHub/Depth_Histogram/opencv2/imgproc.hpp
 iostream
 -
 

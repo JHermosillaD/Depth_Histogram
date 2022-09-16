@@ -1,79 +1,102 @@
-#include <opencv2/objdetect.hpp>
-#include <opencv2/highgui.hpp>
-#include <opencv2/imgproc.hpp>
-#include <opencv2/videoio.hpp>
+#include "opencv2/highgui.hpp"
+#include "opencv2/imgcodecs.hpp"
+#include "opencv2/imgproc.hpp"
 #include <iostream>
 
-using namespace cv;
 using namespace std;
+using namespace cv;
 
+struct Statistics {
 
-Mat drawHistogram(Mat img) {
-  int histsize = 255;
-  int histogram[histsize+1];
-
-  for(int i=0; i<histsize; i++)
-    histogram[i] = 0;
-
-  for(int y=0; y<img.rows; y++)
-    for(int x=0; x<img.cols; x++)
-      histogram[(int)img.at<uchar>(y,x)]++;
-
-  int hist_w = 255;
-  int hist_h = 255;  
-  int bin_w = cvRound((double) hist_w/(histsize+1));
-  int max = histogram[0];
-
-  Mat histImage(hist_h, hist_w, CV_8UC3, Scalar(0,0,0));
+  vector<int> histogram;
   
-  for(int i=1; i<(histsize); i++)
-    if(max < histogram[i])
-      max = histogram[i];
+  double mean() {
+    double sum = 0, mean;
+    for(int k=0; k<65536; k++)
+      sum += (double)histogram[k];
+    mean = sum/65536.0;
+    return mean;
+  }
 
-  for(int i=0; i<histsize; i++)
-    histogram[i] = ((double)histogram[i]/max)*hist_h;
+  double var(double mean) {
+    double var = 0;
+    for(int k=0; k<65536; k++)
+      var += ((double)histogram[k] - mean)*((double)histogram[k] - mean);
+    var = var/(65536.0-1.0);
+    return var;
+  }
 
-  float sum = 0, mean;
-  for(int k=0; k<histsize; k++)
-    sum += histogram[k];
+  double sd(double var) {
+    double sd = sqrt(var);
+    return sd;
+  }  
 
-  mean = sum/(float)histsize;
-  float var = 0;
-  float sd = 0;
-  for(int k=0; k<histsize; k++)
-    var += (histogram[k]-mean)*(histogram[k]-mean);
+  void printStats(double mean, double var, double sd) {
+    cout << "-----------------------------" << endl;
+    cout << "mean:                 " << mean << endl;
+    cout << "variance:             " << var << endl;
+    cout << "standard deviation:   " << sd << endl;
+    cout << "-----------------------------" << endl;
+  }
+};
 
-  var = var/(histsize-1);
-  sd = sqrt(var);
-  float treshold = 210;
-  
-  for(int i = 0; i < histsize; i++)
-    line(histImage, Point(bin_w*(i), hist_h), Point(bin_w*(i), hist_h-histogram[i]), Scalar(0,0,255), 1, 8, 0);
-  line(histImage, Point(bin_w, hist_h-cvRound(treshold)), Point(hist_w,hist_h-cvRound(treshold)), Scalar(255,0,0), 2, 8, 0);
-
-  Mat filtImage(img.rows, img.cols, CV_8UC1, Scalar(0,0,0));
-  for( int i = 0; i < img.rows; ++i) 
-    for( int j = 0; j < img.cols; ++j) 
-      if( (int)img.at<uchar>(i,j) > (int)treshold) 
-	filtImage.at<uchar>(i,j) = 255;
-
-  imshow("Histogram", histImage);
-  hconcat(img,filtImage,img);
-  return img;
+void infoImage(Mat img) {
+  cout << "image width: " << img.cols << '\n'
+       << "image height: " << img.rows << '\n'
+       << "image size: " << (int)img.size().width*(int)img.size().height << '\n'
+       << "image depth: " << img.depth() << '\n'
+       << "image channels " << img.channels() << '\n'
+       << "image type: " << img.type() << '\n' << endl;
 }
 
-int main(int argc, char **argv) {
-  Mat img, histogram;
-  img = imread("/home/jhermosilla/Proyects backup/C-Party/OpenCV/Images/bbox.jpg");
-  if (!img.data) {
-    printf("No image data \n");
-    return -1;
+vector<int> makeHistogram(Mat img) {
+  vector<int> histogram;
+  for(int i=0; i<65537; i++) 
+    histogram.push_back(0);
+
+  for (int i = 0; i < img.rows; ++i) {
+    ushort* pixel_val = img.ptr<ushort>(i);
+    for (int j = 0; j < img.cols; ++j) 
+      histogram[(int)pixel_val[j]]++;
   }
-  cvtColor(img,img, COLOR_BGR2GRAY);
-  Mat dst;
-  equalizeHist(img, dst);
-  histogram = drawHistogram(img);
-  imshow("Equalized image vs Mean filter", histogram);
-  waitKey(0);  
+
+  return histogram;
+}
+
+Mat drawHistogram(Mat img, vector<int> histogram) {
+  int maxHist = *max_element(histogram.begin(), histogram.end());
+  int hist_w = 512; int hist_h = 400;
+  int bin_w = cvRound((double) hist_w/256);
+
+  for(int i = 0; i < 65536; i++)
+    histogram[i] = (int)(((double) histogram[i]/maxHist)*hist_h);
+  
+  Mat histImage(hist_h, hist_w, CV_8UC3, Scalar(0, 0, 0));
+
+  for(int i = 0; i < 65536; i++)
+    line(histImage, Point(bin_w*(i*256)/65536.0, hist_h), Point(bin_w*(i*256)/65536.0, hist_h-histogram[i]), Scalar(0, 0, 255), 2, 8, 0);
+
+  return histImage;
+}   
+		  
+int main(int argc, char** argv) {
+
+  Mat img  = imread("/home/jhermosilla/Proyects backup/C-Party/OpenCV/Images/person.pgm", IMREAD_ANYDEPTH);
+  img.convertTo(img, CV_16U);
+
+  vector<int> vectHistogram = makeHistogram(img);
+  Mat imgHistogram = drawHistogram(img, vectHistogram);
+  double mean, var, sd;
+  Statistics statsHistogram;
+  statsHistogram.histogram = vectHistogram;
+  mean = statsHistogram.mean();
+  var = statsHistogram.var(mean);
+  sd = statsHistogram.sd(var);
+  statsHistogram.printStats(mean, var, sd);
+
+  imshow("Source image", img);
+  imshow("Depth Histogram", imgHistogram);
+  infoImage(img);
+  waitKey();
   return 0;
 }
