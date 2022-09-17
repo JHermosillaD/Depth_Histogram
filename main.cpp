@@ -7,7 +7,6 @@ using namespace std;
 using namespace cv;
 
 struct Statistics {
-
   vector<int> histogram;
   
   double mean() {
