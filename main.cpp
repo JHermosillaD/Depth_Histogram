@@ -6,7 +6,6 @@
 using namespace std;
 using namespace cv;
 
-
 void infoImage(Mat img) {
   cout << "image width: " << img.cols << '\n'
        << "image height: " << img.rows << '\n'
@@ -74,14 +73,12 @@ Mat drawHistogram(Mat img, vector<int> histogram, double mean=0, double stddev=0
     if ( (i & 1) == 0 ) {
       drawMarker(histImage, Point(bin_w*(mean+stddev), (mean/mean)*i), Scalar(0,255,0), MARKER_SQUARE, 1, 1, 4);
       drawMarker(histImage, Point(bin_w*(mean-stddev), (mean/mean)*i), Scalar(0,255,0), MARKER_SQUARE, 1, 1, 4);
-      cout << i << endl;
     }
   
   return histImage;
 }   
 		  
 int main(int argc, char** argv) {
-
   Mat img  = imread("/home/jhermosilla/GitHub/Depth_Histogram/img/person.pgm", IMREAD_ANYDEPTH);
   img.convertTo(img, CV_16U);
   Scalar mean, stddev;
