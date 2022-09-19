@@ -77,7 +77,20 @@ Mat drawHistogram(Mat img, vector<int> histogram, double mean=0, double stddev=0
   
   return histImage;
 }   
-		  
+
+Mat filterImage(Mat img, double mean, double stddev) {
+  for(int i = 0; i < img.rows; ++i) {
+    ushort* pixel_val = img.ptr<ushort>(i);
+    for(int j = 0; j < img.cols; ++j)
+      if((double)pixel_val[j] > mean) 
+	pixel_val[j] = 65535;
+      else 
+	pixel_val[j] = (ushort) 0;
+  }
+
+  return img;
+}
+
 int main(int argc, char** argv) {
   Mat img  = imread("/home/jhermosilla/GitHub/Depth_Histogram/img/person.pgm", IMREAD_ANYDEPTH);
   img.convertTo(img, CV_16U);
@@ -85,19 +98,21 @@ int main(int argc, char** argv) {
   meanStdDev(img, mean, stddev, Mat());
   vector<int> Histogram = makeHistogram(img);
   Mat imgHistogram = drawHistogram(img, Histogram, mean[0], stddev[0]);
-
+  imshow("Source image", img);
+  imshow("Depth Histogram", imgHistogram);
+  
   vector<int> equalFunction = Equalizedfunction(img, Histogram);  
   Mat img_equal = equalizedImage(img, equalFunction);
   Scalar mean_equal, stddev_equal;
   meanStdDev(img_equal, mean_equal, stddev_equal, Mat());
   vector<int> Histogram_equal = makeHistogram(img_equal);
   Mat imgHistogram_equal = drawHistogram(img_equal, Histogram_equal, mean_equal[0], stddev_equal[0]);
-
-  imshow("Source image", img);
-  imshow("Depth Histogram", imgHistogram);
   imshow("Equalized image", img_equal);
   imshow("Equalized Depth Histogram", imgHistogram_equal);
-  infoImage(img_equal);
+
+  Mat img_equal_filt = filterImage(img_equal, mean_equal[0], stddev_equal[0]);
+  imshow("Filtered image", img_equal_filt);
+  infoImage(img_equal_filt);
   waitKey();
   return 0;
 }
