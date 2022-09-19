@@ -119,10 +119,7 @@ int main(int argc, char** argv) {
   vector<int> Histogram = makeHistogram(img);
   Mat imgHistogram = drawHistogram(img, Histogram);
 
-  vector<int> equalFunction = Equalizedfunction(img, Histogram);
-  for(int i=0; i<65537; i++)
-    cout << equalFunction[i] << endl;
-  
+  vector<int> equalFunction = Equalizedfunction(img, Histogram);  
   Mat img_equal = equalizedImage(img, equalFunction);
   vector<int> Histogram_equal = makeHistogram(img_equal);
   Mat imgHistogram_equal = drawHistogram(img_equal, Histogram_equal);
