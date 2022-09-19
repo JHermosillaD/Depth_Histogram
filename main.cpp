@@ -109,7 +109,7 @@ int main(int argc, char** argv) {
   Mat imgHistogram_equal = drawHistogram(img_equal, Histogram_equal, mean_equal[0], stddev_equal[0]);
   imshow("Equalized image", img_equal);
   imshow("Equalized Depth Histogram", imgHistogram_equal);
-
+  
   Mat img_equal_filt = filterImage(img_equal, mean_equal[0], stddev_equal[0]);
   imshow("Filtered image", img_equal_filt);
   infoImage(img_equal_filt);
