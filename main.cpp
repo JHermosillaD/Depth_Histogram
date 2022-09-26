@@ -52,7 +52,7 @@ Mat equalizedImage(Mat img, vector<int> equalFunct) {
     for (int j = 0; j < img.cols; ++j) 
       pixel_val[j] = equalFunct[pixel_val[j]];
   }
-
+  
   return img;
 }
 
