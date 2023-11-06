@@ -1,3 +1,0 @@
-/home/jhermosilla/GitHub/Depth_Histogram/build/CMakeFiles/rebuild_cache.dir
-/home/jhermosilla/GitHub/Depth_Histogram/build/CMakeFiles/edit_cache.dir
-/home/jhermosilla/GitHub/Depth_Histogram/build/CMakeFiles/DisplayHistogram.dir
